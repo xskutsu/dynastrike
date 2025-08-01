@@ -1,1 +1,1 @@
-console.log("Hello World.");
+export { Entity } from "./entity/Entity";
