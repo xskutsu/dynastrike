@@ -31,11 +31,11 @@ export class QuadTree {
 		this.childBottomRight = new QuadTree(width, height, this.maxX, this.maxY, level);
 		const entities: Entity[] = this.entities;
 		for (let i: number = entities.length - 1; i >= 0; i--) {
-			this.insert(entities[i]);
+			this.insertEntity(entities[i]);
 		}
 	}
 
-	public insert(entity: Entity): void {
+	public insertEntity(entity: Entity): void {
 		if (this.hasChildren) {
 			const minX: number = entity.minX;
 			const minY: number = entity.minY;
@@ -46,16 +46,16 @@ export class QuadTree {
 			const bottomLeftQuadTree: QuadTree = this.childBottomLeft!;
 			const bottomRightQuadTree: QuadTree = this.childBottomRight!;
 			if (maxX > topLeftQuadTree.minX && minX < topLeftQuadTree.maxX && maxY > topLeftQuadTree.minY && minY < topLeftQuadTree.maxY) {
-				topLeftQuadTree.insert(entity);
+				topLeftQuadTree.insertEntity(entity);
 			}
 			if (maxX > topRightQuadTree.minX && minX < topRightQuadTree.maxX && maxY > topRightQuadTree.minY && minY < topRightQuadTree.maxY) {
-				topRightQuadTree.insert(entity);
+				topRightQuadTree.insertEntity(entity);
 			}
 			if (maxX > bottomLeftQuadTree.minX && minX < bottomLeftQuadTree.maxX && maxY > bottomLeftQuadTree.minY && minY < bottomLeftQuadTree.maxY) {
-				bottomLeftQuadTree.insert(entity);
+				bottomLeftQuadTree.insertEntity(entity);
 			}
 			if (maxX > bottomRightQuadTree.minX && minX < bottomRightQuadTree.maxX && maxY > bottomRightQuadTree.minY && minY < bottomRightQuadTree.maxY) {
-				bottomRightQuadTree.insert(entity);
+				bottomRightQuadTree.insertEntity(entity);
 			}
 		} else {
 			this.entities.push(entity);
