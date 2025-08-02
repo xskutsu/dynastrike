@@ -4,16 +4,16 @@ export class Entity {
 	public readonly index: number = Entity._indexTicker++;
 	public velocityX: number = 0;
 	public velocityY: number = 0;
-	public minX: number = 0;
-	public minY: number = 0;
-	public maxX: number = 0;
-	public maxY: number = 0;
+	public minX: number;
+	public minY: number;
+	public maxX: number;
+	public maxY: number;
 	public mass: number = 1;
 	public linearDrag: number = 1;
 	public restitution: number = 1;
 	public isStatic: boolean = false;
-	private _positionX: number = 0;
-	private _positionY: number = 0;
+	protected _positionX: number;
+	protected _positionY: number;
 	constructor(positionX: number, positionY: number) {
 		this._positionX = positionX;
 		this._positionY = positionY;
@@ -41,17 +41,6 @@ export class Entity {
 		this._positionY = value;
 		this.minY = value;
 		this.maxY = value;
-	}
-
-	public clone(): Entity {
-		const entity = new Entity(this._positionX, this._positionY);
-		entity.velocityX = this.velocityX;
-		entity.velocityY = this.velocityY;
-		entity.mass = this.mass;
-		entity.linearDrag = this.linearDrag;
-		entity.restitution = this.restitution;
-		entity.isStatic = this.isStatic;
-		return entity;
 	}
 
 	public update(): void {
