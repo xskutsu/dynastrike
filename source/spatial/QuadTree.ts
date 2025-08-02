@@ -58,8 +58,9 @@ export class QuadTree {
 				bottomRightQuadTree.insertEntity(entity);
 			}
 		} else {
-			this.entities.push(entity);
-			if (this.level > 0 && this.entities.length > 8) {
+			const entities = this.entities;
+			entities.push(entity);
+			if (this.level > 0 && entities.length > 8) {
 				this.split();
 			}
 		}
