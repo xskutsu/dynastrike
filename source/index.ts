@@ -1,3 +1,4 @@
-export { Collider } from "./collisions/Collder";
-export { Entity } from "./entity/Entity";
-export { QuadTree } from "./spatial/QuadTree";
+export * from "./collisions/Collder";
+export * from "./entity/Entity";
+export * from "./scene/Scene";
+export * from "./spatial/QuadTree";
