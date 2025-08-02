@@ -55,9 +55,7 @@ export class Entity {
 	}
 
 	public update(): void {
-		this.velocityX *= this.linearDrag;
-		this.velocityY *= this.linearDrag;
-		this.positionX += this.velocityX;
-		this.positionY += this.velocityY;
+		this.positionX += this.velocityX *= this.linearDrag;
+		this.positionY += this.velocityY *= this.linearDrag;
 	}
 }
