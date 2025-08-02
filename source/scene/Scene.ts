@@ -8,13 +8,13 @@ export class Scene {
 	public minY: number;
 	public maxX: number;
 	public maxY: number;
-	public partitioning: QuadTree;
+	public grid: QuadTree;
 	constructor(minX: number, minY: number, maxX: number, maxY: number, gridSize: number) {
 		this.minX = minX;
 		this.minY = minY;
 		this.maxX = maxX;
 		this.maxY = maxY;
-		this.partitioning = new QuadTree(minX, minY, maxX, maxY, gridSize);
+		this.grid = new QuadTree(minX, minY, maxX, maxY, gridSize);
 	}
 
 	public addEntity(entity: Entity): boolean {
@@ -28,17 +28,17 @@ export class Scene {
 	}
 
 	public query(minX: number, minY: number, maxX: number, maxY: number): Set<Entity> {
-		return this.partitioning.query(minX, minY, maxX, maxY);
+		return this.grid.query(minX, minY, maxX, maxY);
 	}
 
 	public update(): void {
 		const processedCollisions: Set<number> = new Set<number>();
-		this.partitioning.clear();
+		this.grid.clear();
 		for (const instance of this.entities.values()) {
 			instance.update();
 			const instanceIndex: number = instance.index;
-			const potentialColliders: Set<Entity> = this.partitioning.query(instance.minX, instance.minY, instance.maxX, instance.maxY);
-			this.partitioning.insertEntity(instance);
+			const potentialColliders: Set<Entity> = this.grid.query(instance.minX, instance.minY, instance.maxX, instance.maxY);
+			this.grid.insertEntity(instance);
 			if (potentialColliders.size !== 0) {
 				for (const other of potentialColliders.values()) {
 					const otherIndex: number = other.index;
