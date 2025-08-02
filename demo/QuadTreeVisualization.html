@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>QuadTree Visualization</title>
+	<style>
+		body {
+			width: 100vw;
+			height: 100vh;
+			border: 0;
+			margin: 0;
+			padding: 0;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			background-color: #202020;
+		}
+	</style>
+</head>
+
+<body>
+	<script src="../dist/dynastrike.global.js"></script>
+	<script>
+		const WIDTH = 800;
+		const HEIGHT = 800;
+
+		const canvasElement = document.createElement("canvas");
+		canvasElement.width = WIDTH;
+		canvasElement.height = HEIGHT;
+		document.body.appendChild(canvasElement);
+
+		const ctx = canvasElement.getContext("2d", { alpha: false, willReadFrequently: false, desynchronized: true });
+
+		const scene = new Dynastrike.Scene(0, 0, WIDTH, HEIGHT, 5);
+		for (let i = 0; i < 250; i++) {
+			const entity = new Dynastrike.Entity(WIDTH * Math.random() * Math.random(), HEIGHT * Math.random());
+			scene.addEntity(entity);
+		}
+
+		function drawBackground() {
+			ctx.clearRect(0, 0, WIDTH, HEIGHT);
+			ctx.fillStyle = "#000000";
+			ctx.fillRect(0, 0, WIDTH, HEIGHT);
+		}
+
+		function drawGrid(grid) {
+			if (grid.hasChildren) {
+				drawGrid(grid.childTopLeft);
+				drawGrid(grid.childTopRight);
+				drawGrid(grid.childBottomLeft);
+				drawGrid(grid.childBottomRight);
+			} else {
+				ctx.strokeStyle = "#0000FF";
+				ctx.lineWidth = 1;
+				ctx.strokeRect(grid.minX, grid.minY, grid.maxX - grid.minX, grid.maxY - grid.minY);
+			}
+		}
+
+		function drawEntities() {
+			ctx.fillStyle = "#FFFFFF";
+			for (const entity of scene.entities.values()) {
+				ctx.beginPath();
+				ctx.arc(entity.positionX, entity.positionY, 1, 0, Math.PI * 2);
+				ctx.fill();
+			}
+		}
+
+		function animationFrame() {
+			scene.update();
+			drawBackground();
+			drawGrid(scene.grid);
+			drawEntities();
+			requestAnimationFrame(animationFrame);
+		}
+
+		animationFrame();
+	</script>
+</body>
+
+</html>
