@@ -15,7 +15,15 @@
 			display: flex;
 			justify-content: center;
 			align-items: center;
+			flex-direction: column;
 			background-color: #202020;
+		}
+
+		p {
+			color: white;
+			font-size: 20px;
+			font-family: monospace;
+			margin: 0;
 		}
 	</style>
 </head>
@@ -26,6 +34,11 @@
 		const WIDTH = 800;
 		const HEIGHT = 800;
 
+		const engineTimeElement = document.createElement("p");
+		document.body.appendChild(engineTimeElement);
+		const renderTimeElement = document.createElement("p");
+		document.body.appendChild(renderTimeElement);
+
 		const canvasElement = document.createElement("canvas");
 		canvasElement.width = WIDTH;
 		canvasElement.height = HEIGHT;
@@ -33,8 +46,8 @@
 
 		const ctx = canvasElement.getContext("2d", { alpha: false, willReadFrequently: false, desynchronized: true });
 
-		const scene = new Dynastrike.Scene(0, 0, WIDTH, HEIGHT, 5);
-		for (let i = 0; i < 250; i++) {
+		const scene = new Dynastrike.Scene(0, 0, WIDTH, HEIGHT, 25);
+		for (let i = 0; i < 2000; i++) {
 			const entity = new Dynastrike.Entity(WIDTH * Math.random() * Math.random(), HEIGHT * Math.random());
 			scene.addEntity(entity);
 		}
@@ -60,19 +73,24 @@
 
 		function drawEntities() {
 			ctx.fillStyle = "#FFFFFF";
+			ctx.beginPath();
 			for (const entity of scene.entities.values()) {
-				ctx.beginPath();
+				ctx.moveTo(entity.positionX - 1, entity.positionY);
 				ctx.arc(entity.positionX, entity.positionY, 1, 0, Math.PI * 2);
-				ctx.fill();
 			}
+			ctx.fill();
 		}
 
 		function animationFrame() {
+			const engineTime = performance.now();
 			scene.update();
+			engineTimeElement.textContent = "engine mspt: " + (performance.now() - engineTime).toFixed(1);
+			const renderTime = performance.now();
 			drawBackground();
 			drawGrid(scene.grid);
 			drawEntities();
 			requestAnimationFrame(animationFrame);
+			renderTimeElement.textContent = "render mspt: " + (performance.now() - renderTime).toFixed(1);
 		}
 
 		animationFrame();
