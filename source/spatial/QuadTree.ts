@@ -33,6 +33,7 @@ export class QuadTree {
 		for (let i: number = entities.length - 1; i >= 0; i--) {
 			this.insertEntity(entities[i]);
 		}
+		entities.length = 0;
 	}
 
 	public insertEntity(entity: Entity): void {
@@ -96,6 +97,6 @@ export class QuadTree {
 		this.childTopRight = null;
 		this.childBottomLeft = null;
 		this.childBottomRight = null;
-		this.entities = [];
+		this.entities.length = 0;
 	}
 }
