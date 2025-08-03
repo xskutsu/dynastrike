@@ -30,19 +30,21 @@ export class QuadTree {
 			const minY: number = entity.minY;
 			const maxX: number = entity.maxX;
 			const maxY: number = entity.maxY;
-			if (minY < this.midY) {
-				if (minX < this.midX) {
+			const midX: number = this.midX;
+			const midY: number = this.midY;
+			if (minY < midY) {
+				if (minX < midX) {
 					this.childTL!.insertEntity(entity);
 				}
-				if (maxX > this.midX) {
+				if (maxX > midX) {
 					this.childTR!.insertEntity(entity);
 				}
 			}
-			if (maxY > this.midY) {
-				if (minX < this.midX) {
+			if (maxY > midY) {
+				if (minX < midX) {
 					this.childBL!.insertEntity(entity);
 				}
-				if (maxX > this.midX) {
+				if (maxX > midX) {
 					this.childBR!.insertEntity(entity);
 				}
 			}
@@ -59,19 +61,21 @@ export class QuadTree {
 	public queryResult: Set<Entity> = new Set<Entity>();
 	public query(minX: number, minY: number, maxX: number, maxY: number): void {
 		if (this.hasChildren) {
-			if (minY < this.midY) {
-				if (minX < this.midX) {
+			const midX: number = this.midX;
+			const midY: number = this.midY;
+			if (minY < midY) {
+				if (minX < midX) {
 					this.childTL!.query(minX, minY, maxX, maxY);
 				}
-				if (maxX > this.midX) {
+				if (maxX > midX) {
 					this.childTR!.query(minX, minY, maxX, maxY);
 				}
 			}
-			if (maxY > this.midY) {
-				if (minX < this.midX) {
+			if (maxY > midY) {
+				if (minX < midX) {
 					this.childBL!.query(minX, minY, maxX, maxY);
 				}
-				if (maxX > this.midX) {
+				if (maxX > midX) {
 					this.childBR!.query(minX, minY, maxX, maxY);
 				}
 			}
@@ -93,31 +97,37 @@ export class QuadTree {
 	private split(): void {
 		this.hasChildren = true;
 		const nextLevel: number = this.level - 1;
-		const childTL: QuadTree = new QuadTree(this.minX, this.minY, this.midX, this.midY, nextLevel);
-		const childTR: QuadTree = new QuadTree(this.midX, this.minY, this.maxX, this.midY, nextLevel);
-		const childBL: QuadTree = new QuadTree(this.minX, this.midY, this.midX, this.maxY, nextLevel);
-		const childBR: QuadTree = new QuadTree(this.midX, this.midY, this.maxX, this.maxY, nextLevel);
+		const midX: number = this.midX;
+		const midY: number = this.midY;
+		let minX: number = this.minX;
+		let minY: number = this.minY;
+		let maxX: number = this.maxX;
+		let maxY: number = this.maxY;
+		const childTL: QuadTree = new QuadTree(minX, minY, midX, midY, nextLevel);
+		const childTR: QuadTree = new QuadTree(midX, minY, maxX, midY, nextLevel);
+		const childBL: QuadTree = new QuadTree(minX, midY, midX, maxY, nextLevel);
+		const childBR: QuadTree = new QuadTree(midX, midY, maxX, maxY, nextLevel);
 		const entities: Entity[] = this.entities;
 		const entitiesLength: number = entities.length;
 		for (let i = 0; i < entitiesLength; i++) {
 			const entity: Entity = entities[i];
-			const minX: number = entity.minX;
-			const minY: number = entity.minY;
-			const maxX: number = entity.maxX;
-			const maxY: number = entity.maxY;
-			if (minY < this.midY) {
-				if (minX < this.midX) {
+			minX = entity.minX;
+			minY = entity.minY;
+			maxX = entity.maxX;
+			maxY = entity.maxY;
+			if (minY < midY) {
+				if (minX < midX) {
 					childTL.insertEntity(entity);
 				}
-				if (maxX > this.midX) {
+				if (maxX > midX) {
 					childTR.insertEntity(entity);
 				}
 			}
-			if (maxY > this.midY) {
-				if (minX < this.midX) {
+			if (maxY > midY) {
+				if (minX < midX) {
 					childBL.insertEntity(entity);
 				}
-				if (maxX > this.midX) {
+				if (maxX > midX) {
 					childBR.insertEntity(entity);
 				}
 			}
