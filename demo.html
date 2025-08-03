@@ -4,11 +4,10 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>QuadTree Visualization</title>
+	<title>Dynastrike Demo</title>
 	<style>
 		body {
 			width: 100vw;
-			height: 100vh;
 			border: 0;
 			margin: 0;
 			padding: 0;
@@ -29,15 +28,21 @@
 </head>
 
 <body>
-	<script src="../dist/dynastrike.global.js"></script>
+	<script src="./dist/dynastrike.global.js"></script>
 	<script>
+		"use strict";
+
 		const WIDTH = 800;
 		const HEIGHT = 800;
+		const TOTAL_ENTITIES = 200;
 
 		const engineTimeElement = document.createElement("p");
 		document.body.appendChild(engineTimeElement);
 		const renderTimeElement = document.createElement("p");
 		document.body.appendChild(renderTimeElement);
+		const totalEntitiesElement = document.createElement("p");
+		totalEntitiesElement.textContent = "total entities: " + TOTAL_ENTITIES;
+		document.body.appendChild(totalEntitiesElement);
 
 		const canvasElement = document.createElement("canvas");
 		canvasElement.width = WIDTH;
@@ -46,9 +51,9 @@
 
 		const ctx = canvasElement.getContext("2d", { alpha: false, willReadFrequently: false, desynchronized: true });
 
-		const scene = new Dynastrike.Scene(0, 0, WIDTH, HEIGHT, 25);
-		for (let i = 0; i < 2000; i++) {
-			const entity = new Dynastrike.Entity(WIDTH * Math.random() * Math.random(), HEIGHT * Math.random());
+		const scene = new Dynastrike.Scene(0, 0, WIDTH, HEIGHT, 5);
+		for (let i = 0; i < TOTAL_ENTITIES; i++) {
+			const entity = new Dynastrike.CircleEntity(WIDTH * Math.random() * Math.random(), HEIGHT * Math.random(), 3 + 10 * Math.random());
 			scene.addEntity(entity);
 		}
 
@@ -60,10 +65,10 @@
 
 		function drawGrid(grid) {
 			if (grid.hasChildren) {
-				drawGrid(grid.childTopLeft);
-				drawGrid(grid.childTopRight);
-				drawGrid(grid.childBottomLeft);
-				drawGrid(grid.childBottomRight);
+				drawGrid(grid.childTL);
+				drawGrid(grid.childTR);
+				drawGrid(grid.childBL);
+				drawGrid(grid.childBR);
 			} else {
 				ctx.strokeStyle = "#0000FF";
 				ctx.lineWidth = 1;
@@ -72,13 +77,33 @@
 		}
 
 		function drawEntities() {
-			ctx.fillStyle = "#FFFFFF";
-			ctx.beginPath();
+			ctx.lineWidth = 1;
 			for (const entity of scene.entities.values()) {
-				ctx.moveTo(entity.positionX - 1, entity.positionY);
-				ctx.arc(entity.positionX, entity.positionY, 1, 0, Math.PI * 2);
+				ctx.strokeStyle = "#FFFFFF";
+				ctx.beginPath();
+				switch (entity.type) {
+					case 0:
+						ctx.rect(entity.positionX, entity.positionY, 1, 1);
+						break;
+					case 1:
+						ctx.arc(entity.positionX, entity.positionY, entity.radius, 0, Math.PI * 2);
+						break;
+					case 2:
+						const vertices = entity.vertices;
+						ctx.moveTo(vertices[0], vertices[1]);
+						const verticesLength = vertices.length;
+						for (let i = 2; i < verticesLength; i += 2) {
+							ctx.lineTo(vertices[i], vertices[i + 1]);
+						}
+						break;
+				}
+				ctx.closePath();
+				ctx.stroke();
+				ctx.strokeStyle = "#FF0000";
+				const minX = entity.minX;
+				const minY = entity.minY;
+				ctx.strokeRect(minX, minY, entity.maxX - minX, entity.maxY - entity.minY);
 			}
-			ctx.fill();
 		}
 
 		function animationFrame() {
