@@ -78,9 +78,8 @@ export class PolygonEntity extends RotatableEntity {
 		const sin: number = Math.sin(delta);
 		const vertices: number[] = this.vertices;
 		const verticesLength: number = vertices.length;
-		// NOTE: maxX and maxY are treated as relativeX and relativeY temporarily.
-		let maxX: number = (vertices[0] - positionX);
-		let maxY: number = (vertices[1] - positionX);
+		let maxX: number = vertices[0] - positionX; // NOTE: maxX and maxY are treated as relativeX and relativeY temporarily.
+		let maxY: number = vertices[1] - positionX;
 		let minX: number = maxX * cos - maxY * sin + positionX;
 		let minY: number = maxX * sin + maxY * cos + positionY;
 		maxX = minX;
@@ -88,8 +87,8 @@ export class PolygonEntity extends RotatableEntity {
 		vertices[0] = minX;
 		vertices[1] = minY;
 		for (let i: number = 2; i < verticesLength; i += 2) {
-			const relativeX: number = (vertices[i] - positionX);
-			const relativeY: number = (vertices[i + 1] - positionY);
+			const relativeX: number = vertices[i] - positionX;
+			const relativeY: number = vertices[i + 1] - positionY;
 			const pointX: number = relativeX * cos - relativeY * sin + positionX;
 			const pointY: number = relativeX * sin + relativeY * cos + positionY;
 			vertices[i] = pointX;
