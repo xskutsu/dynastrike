@@ -26,12 +26,8 @@ export class Scene {
 		return this.entities.delete(entity.index);
 	}
 
-	public query(minX: number, minY: number, maxX: number, maxY: number): Set<Entity> {
-		const grid: QuadTree = this.grid;
-		const result: Set<Entity> = grid.queryResult;
-		result.clear();
-		grid.query(minX, minY, maxX, maxY);
-		return result;
+	public query(minX: number, minY: number, maxX: number, maxY: number): Entity[] {
+		return this.grid.query(minX, minY, maxX, maxY);
 	}
 
 	public update(): void {
@@ -39,11 +35,13 @@ export class Scene {
 		this.grid.clear();
 		for (const instance of this.entities.values()) {
 			instance.update();
-			const potentialColliders: Set<Entity> = this.query(instance.minX, instance.minY, instance.maxX, instance.maxY);
+			const potentialColliders: Entity[] = this.grid.query(instance.minX, instance.minY, instance.maxX, instance.maxY);
 			this.grid.insertEntity(instance);
-			if (potentialColliders.size !== 0) {
+			if (potentialColliders.length !== 0) {
 				const instanceIndex: number = instance.index;
-				for (const other of potentialColliders.values()) {
+				const potentialCollidersLength = potentialColliders.length;
+				for (let i = 0; i < potentialCollidersLength; i++) {
+					const other = potentialColliders[i];
 					const otherIndex: number = other.index;
 					const pairIndex: number = instanceIndex < otherIndex ? (otherIndex << 16) | instanceIndex : (instanceIndex << 16) | otherIndex;
 					if (!processedCollisions.has(pairIndex)) {

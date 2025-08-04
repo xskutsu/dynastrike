@@ -57,40 +57,37 @@ export class QuadTree {
 		}
 	}
 
-	public queryResult: Set<Entity> = new Set<Entity>();
-	public query(minX: number, minY: number, maxX: number, maxY: number): void {
+	public query(minX: number, minY: number, maxX: number, maxY: number, _rset: Entity[] = []): Entity[] {
 		if (this.hasChildren) {
 			const midX: number = this.midX;
 			const midY: number = this.midY;
 			if (minY < midY) {
 				if (minX < midX) {
-					this.childTL!.query(minX, minY, maxX, maxY);
+					this.childTL!.query(minX, minY, maxX, maxY, _rset);
 				}
 				if (maxX > midX) {
-					this.childTR!.query(minX, minY, maxX, maxY);
+					this.childTR!.query(minX, minY, maxX, maxY, _rset);
 				}
 			}
 			if (maxY > midY) {
 				if (minX < midX) {
-					this.childBL!.query(minX, minY, maxX, maxY);
+					this.childBL!.query(minX, minY, maxX, maxY, _rset);
 				}
 				if (maxX > midX) {
-					this.childBR!.query(minX, minY, maxX, maxY);
+					this.childBR!.query(minX, minY, maxX, maxY, _rset);
 				}
 			}
 		} else {
 			const entities: Entity[] = this.entities;
 			const entitiesLength: number = entities.length;
-			if (entitiesLength > 0) {
-				const result: Set<Entity> = this.queryResult;
-				for (let i: number = 0; i < entitiesLength; i++) {
-					const entity = entities[i];
-					if (entity.minX < maxX && entity.maxX > minX && entity.minY < maxY && entity.maxY > minY) {
-						result.add(entity);
-					}
+			for (let i: number = 0; i < entitiesLength; i++) {
+				const entity = entities[i];
+				if (entity.minX < maxX && entity.maxX > minX && entity.minY < maxY && entity.maxY > minY) {
+					_rset.push(entity);
 				}
 			}
 		}
+		return _rset;
 	}
 
 	private split(): void {
