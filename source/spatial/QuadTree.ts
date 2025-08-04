@@ -90,6 +90,36 @@ export class QuadTree {
 		return _rset;
 	}
 
+	public queryPoint(pointX: number, pointY: number, _rset: Entity[] = []): Entity[] {
+		if (this.hasChildren) {
+			const midX: number = this.midX;
+			const midY: number = this.midY;
+			if (pointY < midY) {
+				if (pointX < midX) {
+					this.childTL!.queryPoint(pointX, pointY, _rset);
+				} else {
+					this.childTR!.queryPoint(pointX, pointY, _rset);
+				}
+			} else {
+				if (pointX < midX) {
+					this.childBL!.queryPoint(pointX, pointY, _rset);
+				} else {
+					this.childBR!.queryPoint(pointX, pointY, _rset);
+				}
+			}
+		} else {
+			const entities: Entity[] = this.entities;
+			const entitiesLength: number = entities.length;
+			for (let i: number = 0; i < entitiesLength; i++) {
+				const entity = entities[i];
+				if (entity.minX <= pointX && entity.maxX >= pointX && entity.minY <= pointY && entity.maxY >= pointY) {
+					_rset.push(entity);
+				}
+			}
+		}
+		return _rset;
+	}
+
 	private split(): void {
 		this.hasChildren = true;
 		const nextLevel: number = this.level - 1;
