@@ -43,6 +43,7 @@ export class Scene {
 		for (const instance of this.entities.values()) {
 			instance.update();
 			colliders = grid.query(instance.minX, instance.minY, instance.maxX, instance.maxY);
+			grid.insertEntity(instance);
 			collidersLength = colliders.length;
 			if (collidersLength !== 0) {
 				instanceIndex = instance.index;
