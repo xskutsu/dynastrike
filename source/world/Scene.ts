@@ -31,21 +31,27 @@ export class Scene {
 	}
 
 	public update(): void {
-		const processedCollisions: Set<number> = new Set<number>();
-		this.grid.clear();
+		const grid: QuadTree = this.grid;
+		grid.clear();
+		const collisions: Set<number> = new Set<number>();
+		let colliders: Entity[];
+		let collidersLength: number;
+		let other: Entity;
+		let instanceIndex: number;
+		let otherIndex: number;
+		let pairIndex: number;
 		for (const instance of this.entities.values()) {
 			instance.update();
-			const potentialColliders: Entity[] = this.grid.query(instance.minX, instance.minY, instance.maxX, instance.maxY);
-			this.grid.insertEntity(instance);
-			if (potentialColliders.length !== 0) {
-				const instanceIndex: number = instance.index;
-				const potentialCollidersLength = potentialColliders.length;
-				for (let i = 0; i < potentialCollidersLength; i++) {
-					const other = potentialColliders[i];
-					const otherIndex: number = other.index;
-					const pairIndex: number = instanceIndex < otherIndex ? (otherIndex << 16) | instanceIndex : (instanceIndex << 16) | otherIndex;
-					if (!processedCollisions.has(pairIndex)) {
-						processedCollisions.add(pairIndex);
+			colliders = grid.query(instance.minX, instance.minY, instance.maxX, instance.maxY);
+			collidersLength = colliders.length;
+			if (collidersLength !== 0) {
+				instanceIndex = instance.index;
+				for (let i: number = 0; i < collidersLength; i++) {
+					other = colliders[i];
+					otherIndex = other.index;
+					pairIndex = instanceIndex < otherIndex ? (otherIndex << 16) | instanceIndex : (instanceIndex << 16) | otherIndex;
+					if (!collisions.has(pairIndex)) {
+						collisions.add(pairIndex);
 					}
 				}
 			}
