@@ -57,7 +57,6 @@ export class QuadTree {
 		}
 	}
 
-	// TODO: Create a pool of result sets or return to parameter-based approach.
 	public queryResult: Set<Entity> = new Set<Entity>();
 	public query(minX: number, minY: number, maxX: number, maxY: number): void {
 		if (this.hasChildren) {
