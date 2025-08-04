@@ -65,11 +65,11 @@ export class PolygonEntity extends RotatableEntity {
 		this.maxY += delta;
 	}
 
-	public get angle(): number {
+	public override get angle(): number {
 		return this._angle;
 	}
 
-	public set angle(value: number) {
+	public override set angle(value: number) {
 		const delta: number = value - this._angle;
 		this._angle = value;
 		const positionX: number = this._positionX;
