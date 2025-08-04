@@ -34,7 +34,7 @@
 
 		const WIDTH = 800;
 		const HEIGHT = 800;
-		const TOTAL_ENTITIES = 200;
+		const TOTAL_ENTITIES = 10000;
 
 		const engineTimeElement = document.createElement("p");
 		document.body.appendChild(engineTimeElement);
@@ -51,9 +51,9 @@
 
 		const ctx = canvasElement.getContext("2d", { alpha: false, willReadFrequently: false, desynchronized: true });
 
-		const scene = new Dynastrike.Scene(0, 0, WIDTH, HEIGHT, 5);
+		const scene = new Dynastrike.Scene(0, 0, WIDTH, HEIGHT, 7);
 		for (let i = 0; i < TOTAL_ENTITIES; i++) {
-			const entity = new Dynastrike.CircleEntity(WIDTH * Math.random() * Math.random(), HEIGHT * Math.random(), 3 + 10 * Math.random());
+			const entity = new Dynastrike.PointEntity(WIDTH * Math.random() * (0.25 + 0.75 * Math.random()), HEIGHT * Math.random());
 			scene.addEntity(entity);
 		}
 
@@ -79,14 +79,15 @@
 		function drawEntities() {
 			ctx.lineWidth = 1;
 			for (const entity of scene.entities.values()) {
-				ctx.strokeStyle = "#FFFFFF";
-				ctx.beginPath();
+				ctx.fillStyle = "#FFFFFF";
 				switch (entity.type) {
 					case 0:
-						ctx.rect(entity.positionX, entity.positionY, 1, 1);
+						ctx.fillRect(entity.positionX | 0, entity.positionY | 0, 1, 1);
 						break;
 					case 1:
+						ctx.beginPath();
 						ctx.arc(entity.positionX, entity.positionY, entity.radius, 0, Math.PI * 2);
+						ctx.stroke();
 						break;
 					case 2:
 						const vertices = entity.vertices;
@@ -95,10 +96,10 @@
 						for (let i = 2; i < verticesLength; i += 2) {
 							ctx.lineTo(vertices[i], vertices[i + 1]);
 						}
+						ctx.closePath();
+						ctx.stroke();
 						break;
 				}
-				ctx.closePath();
-				ctx.stroke();
 				ctx.strokeStyle = "#FF0000";
 				const minX = entity.minX;
 				const minY = entity.minY;
