@@ -22,7 +22,7 @@ const presets = [
 		platform: "neutral",
 	},
 	{
-		minify: true,
+		minify: false,
 		format: "iife",
 		outfile: "dist/dynastrike.global.js",
 		globalName: "Dynastrike",
