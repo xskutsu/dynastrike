@@ -39,8 +39,8 @@ export class Scene {
 		this.grid.clear();
 		for (const instance of this.entities.values()) {
 			instance.update();
-			this.grid.insertEntity(instance);
 			const potentialColliders: Set<Entity> = this.query(instance.minX, instance.minY, instance.maxX, instance.maxY);
+			this.grid.insertEntity(instance);
 			if (potentialColliders.size !== 0) {
 				const instanceIndex: number = instance.index;
 				for (const other of potentialColliders.values()) {
