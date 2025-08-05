@@ -2,37 +2,38 @@ import { EntityType } from "../const/entity";
 import { RotatableEntity } from "./abstract/RotatableEntity";
 
 export class CircleEntity extends RotatableEntity {
-	public readonly type = EntityType.Circle;
-	private _radius: number;
+	public type = EntityType.Circle;
+	public angle: number = 0;
+	protected _radius: number = 0;
 	constructor(positionX: number, positionY: number, radius: number) {
-		super(positionX, positionY);
+		super();
+		this._positionX = positionX;
 		this.minX = positionX - radius;
 		this.maxX = positionX + radius;
+		this._positionY = positionY;
 		this.minY = positionY - radius;
 		this.maxY = positionY + radius;
 		this._radius = radius;
 	}
 
-	public override get positionX(): number {
+	public get positionX(): number {
 		return this._positionX;
 	}
 
-	public override set positionX(value: number) {
+	public set positionX(value: number) {
 		this._positionX = value;
-		const radius: number = this._radius;
-		this.minX = value - radius;
-		this.maxX = value + radius;
+		this.minX = value;
+		this.maxX = value;
 	}
 
-	public override get positionY(): number {
+	public get positionY(): number {
 		return this._positionY;
 	}
 
-	public override set positionY(value: number) {
+	public set positionY(value: number) {
 		this._positionY = value;
-		const radius: number = this._radius;
-		this.minY = value - radius;
-		this.maxY = value + radius;
+		this.minY = value;
+		this.maxY = value;
 	}
 
 	public get radius(): number {
@@ -47,5 +48,20 @@ export class CircleEntity extends RotatableEntity {
 		const positionY: number = this.positionY;
 		this.minY = positionY - value;
 		this.maxY = positionY + value;
+	}
+
+	public update(deltaTime: number): void {
+		const velocityX: number = this.velocityX;
+		if (Math.abs(velocityX) > 0.01) {
+			this.positionX += velocityX;
+		}
+		const velocityY: number = this.velocityY;
+		if (Math.abs(velocityY) > 0.01) {
+			this.positionY += velocityY;
+		}
+		const angularVelocity: number = this.angularVelocity;
+		if (Math.abs(angularVelocity) > 0.001) {
+			this.angle += angularVelocity;
+		}
 	}
 }

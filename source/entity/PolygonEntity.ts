@@ -5,12 +5,14 @@ export class PolygonEntity extends RotatableEntity {
 	public readonly type = EntityType.Polygon;
 	public readonly vertices: number[];
 	constructor(positionX: number, positionY: number, vertices: number[]) {
-		super(positionX, positionY);
+		super();
+		this._positionX = positionX;
+		this._positionY = positionY;
 		let minX: number = positionX + vertices[0];
 		let minY: number = positionY + vertices[1];
 		let maxX = minX;
 		let maxY = minY;
-		this.vertices = [minX, minY];
+		const _vertices: number[] = [minX, minY];
 		const verticesLength: number = vertices.length;
 		for (let i: number = 2; i < verticesLength; i += 2) {
 			const pointX: number = positionX + vertices[i];
@@ -25,19 +27,20 @@ export class PolygonEntity extends RotatableEntity {
 			} else if (pointY > maxY) {
 				maxY = pointY;
 			}
-			this.vertices.push(pointX, pointY);
+			_vertices.push(pointX, pointY);
 		}
 		this.minX = minX;
 		this.minY = minY;
 		this.maxX = maxX;
 		this.maxY = maxY;
+		this.vertices = _vertices;
 	}
 
-	public override get positionX(): number {
+	public get positionX(): number {
 		return this._positionX;
 	}
 
-	public override set positionX(value: number) {
+	public set positionX(value: number) {
 		const delta = value - this._positionX;
 		this._positionX = value;
 		const vertices: number[] = this.vertices;
@@ -49,11 +52,11 @@ export class PolygonEntity extends RotatableEntity {
 		this.maxX += delta;
 	}
 
-	public override get positionY(): number {
+	public get positionY(): number {
 		return this._positionY;
 	}
 
-	public override set positionY(value: number) {
+	public set positionY(value: number) {
 		const delta = value - this._positionY;
 		this._positionY = value;
 		const vertices: number[] = this.vertices;
@@ -65,11 +68,11 @@ export class PolygonEntity extends RotatableEntity {
 		this.maxY += delta;
 	}
 
-	public override get angle(): number {
+	public get angle(): number {
 		return this._angle;
 	}
 
-	public override set angle(value: number) {
+	public set angle(value: number) {
 		const delta: number = value - this._angle;
 		this._angle = value;
 		const positionX: number = this._positionX;
@@ -78,7 +81,7 @@ export class PolygonEntity extends RotatableEntity {
 		const sin: number = Math.sin(delta);
 		const vertices: number[] = this.vertices;
 		const verticesLength: number = vertices.length;
-		let maxX: number = vertices[0] - positionX; // NOTE: maxX and maxY are treated as relativeX and relativeY temporarily.
+		let maxX: number = vertices[0] - positionX;
 		let maxY: number = vertices[1] - positionX;
 		let minX: number = maxX * cos - maxY * sin + positionX;
 		let minY: number = maxX * sin + maxY * cos + positionY;
@@ -108,5 +111,20 @@ export class PolygonEntity extends RotatableEntity {
 		this.minY = minY;
 		this.maxX = maxX;
 		this.maxY = maxY;
+	}
+
+	public update(deltaTime: number): void {
+		const velocityX: number = this.velocityX;
+		if (Math.abs(velocityX) > 0.01) {
+			this.positionX += velocityX;
+		}
+		const velocityY: number = this.velocityY;
+		if (Math.abs(velocityY) > 0.01) {
+			this.positionY += velocityY;
+		}
+		const angularVelocity: number = this.angularVelocity;
+		if (Math.abs(angularVelocity) > 0.001) {
+			this.angle += angularVelocity;
+		}
 	}
 }
