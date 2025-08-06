@@ -1,4 +1,4 @@
-import { EntityType } from "../const/entity";
+import { EntityType } from "../const/entityType";
 import { BaseEntity } from "./abstract/BaseEntity";
 
 export class PointEntity extends BaseEntity {

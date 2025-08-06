@@ -1,4 +1,4 @@
-import { EntityType } from "../const/entity";
+import { EntityType } from "../const/entityType";
 import { RotatableEntity } from "./abstract/RotatableEntity";
 
 export class CircleEntity extends RotatableEntity {
