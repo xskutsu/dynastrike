@@ -34,14 +34,13 @@
 
 		const WIDTH = 800;
 		const HEIGHT = 800;
-		const TOTAL_ENTITIES = 10000;
+		const TOTAL_ENTITIES = 200;
 
 		const engineTimeElement = document.createElement("p");
 		document.body.appendChild(engineTimeElement);
 		const renderTimeElement = document.createElement("p");
 		document.body.appendChild(renderTimeElement);
 		const totalEntitiesElement = document.createElement("p");
-		totalEntitiesElement.textContent = "total entities: " + TOTAL_ENTITIES;
 		document.body.appendChild(totalEntitiesElement);
 
 		const canvasElement = document.createElement("canvas");
@@ -53,7 +52,7 @@
 
 		const scene = new Dynastrike.Scene(0, 0, WIDTH, HEIGHT, 7);
 		for (let i = 0; i < TOTAL_ENTITIES; i++) {
-			const entity = new Dynastrike.PointEntity(WIDTH * Math.random() * (0.25 + 0.75 * Math.random()), HEIGHT * Math.random());
+			const entity = new Dynastrike.Entity(WIDTH * Math.random() * (0.25 + 0.75 * Math.random()), HEIGHT * Math.random(), 20);
 			scene.addEntity(entity);
 		}
 
@@ -79,37 +78,20 @@
 		function drawEntities() {
 			ctx.lineWidth = 1;
 			for (const entity of scene.entities.values()) {
-				ctx.fillStyle = "#FFFFFF";
-				switch (entity.type) {
-					case 0:
-						ctx.fillRect(entity.positionX | 0, entity.positionY | 0, 1, 1);
-						break;
-					case 1:
-						ctx.beginPath();
-						ctx.arc(entity.positionX, entity.positionY, entity.radius, 0, Math.PI * 2);
-						ctx.stroke();
-						break;
-					case 2:
-						const vertices = entity.vertices;
-						ctx.moveTo(vertices[0], vertices[1]);
-						const verticesLength = vertices.length;
-						for (let i = 2; i < verticesLength; i += 2) {
-							ctx.lineTo(vertices[i], vertices[i + 1]);
-						}
-						ctx.closePath();
-						ctx.stroke();
-						break;
-				}
-				ctx.strokeStyle = "#FF0000";
-				const minX = entity.minX;
-				const minY = entity.minY;
-				ctx.strokeRect(minX, minY, entity.maxX - minX, entity.maxY - entity.minY);
+				ctx.strokeStyle = "#FFFFFF";
+				ctx.beginPath();
+				ctx.arc(entity.positionX, entity.positionY, entity.radius, 0, Math.PI * 2);
+				ctx.stroke();
+				//ctx.strokeStyle = "#FF0000";
+				//const minX = entity.minX;
+				//const minY = entity.minY;
+				//ctx.strokeRect(minX, minY, entity.maxX - minX, entity.maxY - entity.minY);
 			}
 		}
 
 		function animationFrame() {
 			const engineTime = performance.now();
-			scene.update();
+			scene.tick(1);
 			engineTimeElement.textContent = "engine mspt: " + (performance.now() - engineTime).toFixed(1);
 			const renderTime = performance.now();
 			drawBackground();
@@ -117,6 +99,7 @@
 			drawEntities();
 			requestAnimationFrame(animationFrame);
 			renderTimeElement.textContent = "render mspt: " + (performance.now() - renderTime).toFixed(1);
+			totalEntitiesElement.textContent = "total entities: " + scene.entities.size;
 		}
 
 		animationFrame();

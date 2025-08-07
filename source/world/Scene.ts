@@ -1,5 +1,7 @@
+import { Entity } from "../entity/Entity";
 import { QuadTree } from "../spatial/QuadTree";
-import { Entity } from "../types/entity";
+
+export const MAX_DELTA_TIME: number = 0.25;
 
 export class Scene {
 	public readonly entities: Map<number, Entity> = new Map<number, Entity>();
@@ -8,12 +10,12 @@ export class Scene {
 	public maxX: number;
 	public maxY: number;
 	public grid: QuadTree;
-	constructor(minX: number, minY: number, maxX: number, maxY: number, gridSize: number) {
+	constructor(minX: number, minY: number, maxX: number, maxY: number, gridDepth: number) {
 		this.minX = minX;
 		this.minY = minY;
 		this.maxX = maxX;
 		this.maxY = maxY;
-		this.grid = new QuadTree(minX, minY, maxX, maxY, gridSize);
+		this.grid = new QuadTree(minX, minY, maxX, maxY, gridDepth);
 	}
 
 	public addEntity(entity: Entity): boolean {
@@ -30,7 +32,7 @@ export class Scene {
 		return this.grid.query(minX, minY, maxX, maxY);
 	}
 
-	public update(): void {
+	public tick(deltaTime: number): void {
 		const grid: QuadTree = this.grid;
 		grid.clear();
 		const collisions: Set<number> = new Set<number>();
@@ -41,18 +43,22 @@ export class Scene {
 		let otherIndex: number;
 		let pairIndex: number;
 		for (const instance of this.entities.values()) {
-			instance.update();
-			colliders = grid.query(instance.minX, instance.minY, instance.maxX, instance.maxY);
-			grid.insertEntity(instance);
-			collidersLength = colliders.length;
-			if (collidersLength !== 0) {
-				instanceIndex = instance.index;
-				for (let i: number = 0; i < collidersLength; i++) {
-					other = colliders[i];
-					otherIndex = other.index;
-					pairIndex = instanceIndex < otherIndex ? (otherIndex << 16) | instanceIndex : (instanceIndex << 16) | otherIndex;
-					if (!collisions.has(pairIndex)) {
-						collisions.add(pairIndex);
+			if (instance.isSleeping) {
+				grid.insertEntity(instance);
+			} else {
+				instance.update(deltaTime);
+				colliders = grid.query(instance.minX, instance.minY, instance.maxX, instance.maxY);
+				grid.insertEntity(instance);
+				collidersLength = colliders.length;
+				if (collidersLength > 0) {
+					instanceIndex = instance.index;
+					for (let i: number = 0; i < collidersLength; i++) {
+						other = colliders[i];
+						otherIndex = other.index;
+						pairIndex = instanceIndex < otherIndex ? (otherIndex << 16) | instanceIndex : (instanceIndex << 16) | otherIndex;
+						if (!collisions.has(pairIndex)) {
+							collisions.add(pairIndex);
+						}
 					}
 				}
 			}

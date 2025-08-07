@@ -1,4 +1,4 @@
-import { Entity } from "../types/entity";
+import { Entity } from "../entity/Entity";
 
 export class QuadTree {
 	public hasChildren: boolean = false;
