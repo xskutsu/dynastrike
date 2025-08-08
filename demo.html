@@ -34,7 +34,7 @@
 
 		const WIDTH = 800;
 		const HEIGHT = 800;
-		const TOTAL_ENTITIES = 200;
+		const TOTAL_ENTITIES = 1000;
 
 		const engineTimeElement = document.createElement("p");
 		document.body.appendChild(engineTimeElement);
@@ -50,10 +50,54 @@
 
 		const ctx = canvasElement.getContext("2d", { alpha: false, willReadFrequently: false, desynchronized: true });
 
-		const scene = new Dynastrike.Scene(0, 0, WIDTH, HEIGHT, 7);
+		const scene = new Dynastrike.Scene(0, 0, WIDTH, HEIGHT, 6);
 		for (let i = 0; i < TOTAL_ENTITIES; i++) {
-			const entity = new Dynastrike.Entity(WIDTH * Math.random() * (0.25 + 0.75 * Math.random()), HEIGHT * Math.random(), 20);
+			const size = 5 + 5 * Math.random(); // + 2 * Math.random();
+			const entity = new Dynastrike.Entity(WIDTH / (1.1 + 2 * Math.random()), HEIGHT * (0.2 + 0.6 * Math.random()), size);
+			entity.mass = size;
 			scene.addEntity(entity);
+		}
+
+		const playerEntity = new Dynastrike.Entity(100, HEIGHT / 2, 50);
+		playerEntity.mass = 9999;
+		scene.addEntity(playerEntity);
+		let commands = 0;
+		addEventListener("keydown", function (event) {
+			switch (event.code) {
+				case "KeyW": commands |= 1; break;
+				case "KeyS": commands |= 2; break;
+				case "KeyA": commands |= 4; break;
+				case "KeyD": commands |= 8; break;
+				case "KeyK": commands ^= 16; break;
+			}
+		});
+		addEventListener("keyup", function (event) {
+			switch (event.code) {
+				case "KeyW": commands &= ~1; break;
+				case "KeyS": commands &= ~2; break;
+				case "KeyA": commands &= ~4; break;
+				case "KeyD": commands &= ~8; break;
+			}
+		});
+
+		function playerInput() {
+			playerEntity.wakeUp();
+			const speed = 0.2;
+			if (commands & 1) {
+				playerEntity.velocityY -= speed;
+			}
+			if (commands & 2) {
+				playerEntity.velocityY += speed;
+			}
+			if (commands & 4) {
+				playerEntity.velocityX -= speed;
+			}
+			if (commands & 8) {
+				playerEntity.velocityX += speed;
+			}
+			if (commands & 16) {
+				playerEntity.angularVelocity += 0.0025;
+			}
 		}
 
 		function drawBackground() {
@@ -77,8 +121,11 @@
 
 		function drawEntities() {
 			ctx.lineWidth = 1;
-			for (const entity of scene.entities.values()) {
-				ctx.strokeStyle = "#FFFFFF";
+			const entities = scene.entities;
+			const entitiesLength = entities.length;
+			for (let i = 0; i < entitiesLength; i++) {
+				const entity = entities[i];
+				ctx.strokeStyle = entity.isSleeping ? "#888888" : "#FFFFFF";
 				ctx.beginPath();
 				ctx.arc(entity.positionX, entity.positionY, entity.radius, 0, Math.PI * 2);
 				ctx.stroke();
@@ -90,6 +137,7 @@
 		}
 
 		function animationFrame() {
+			playerInput();
 			const engineTime = performance.now();
 			scene.tick(1);
 			engineTimeElement.textContent = "engine mspt: " + (performance.now() - engineTime).toFixed(1);
@@ -99,7 +147,7 @@
 			drawEntities();
 			requestAnimationFrame(animationFrame);
 			renderTimeElement.textContent = "render mspt: " + (performance.now() - renderTime).toFixed(1);
-			totalEntitiesElement.textContent = "total entities: " + scene.entities.size;
+			totalEntitiesElement.textContent = "total entities: " + scene.entities.length;
 		}
 
 		animationFrame();
