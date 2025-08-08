@@ -1,5 +1,8 @@
 import { Entity } from "../entity/Entity";
 
+export const QUADTREE_LEAF_MAX_ENTITIES: number = 10;
+
+// TODO: Make non recursive. Object pool the entire tree perhaps.
 export class QuadTree {
 	public hasChildren: boolean = false;
 	public childTL: QuadTree | null = null;
@@ -51,7 +54,7 @@ export class QuadTree {
 		} else {
 			const entities: Entity[] = this.entities;
 			entities.push(entity);
-			if (this.level > 0 && entities.length > 8) {
+			if (this.level > 0 && entities.length > QUADTREE_LEAF_MAX_ENTITIES) {
 				this.split();
 			}
 		}
@@ -134,8 +137,8 @@ export class QuadTree {
 		const childBL: QuadTree = new QuadTree(minX, midY, midX, maxY, nextLevel);
 		const childBR: QuadTree = new QuadTree(midX, midY, maxX, maxY, nextLevel);
 		const entities: Entity[] = this.entities;
-		const entitiesLength: number = entities.length;
-		for (let i = 0; i < entitiesLength; i++) {
+		const length: number = QUADTREE_LEAF_MAX_ENTITIES + 1;
+		for (let i = 0; i < length; i++) {
 			const entity: Entity = entities[i];
 			minX = entity.minX;
 			minY = entity.minY;
