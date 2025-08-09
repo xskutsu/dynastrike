@@ -34,7 +34,7 @@
 
 		const WIDTH = 800;
 		const HEIGHT = 800;
-		const TOTAL_ENTITIES = 1000;
+		const TOTAL_ENTITIES = 20;
 
 		const engineTimeElement = document.createElement("p");
 		document.body.appendChild(engineTimeElement);
@@ -50,16 +50,18 @@
 
 		const ctx = canvasElement.getContext("2d", { alpha: false, willReadFrequently: false, desynchronized: true });
 
-		const scene = new Dynastrike.Scene(0, 0, WIDTH, HEIGHT, 6);
+		const scene = new Dynastrike.Scene(0, 0, WIDTH, HEIGHT, 7);
 		for (let i = 0; i < TOTAL_ENTITIES; i++) {
-			const size = 5 + 5 * Math.random(); // + 2 * Math.random();
-			const entity = new Dynastrike.Entity(WIDTH / (1.1 + 2 * Math.random()), HEIGHT * (0.2 + 0.6 * Math.random()), size);
-			entity.mass = size;
+			const size = 5 + 10 * Math.random(); // + 2 * Math.random();
+			const entity = new Dynastrike.Entity(400, 400, size);
+			entity.mass = 10;
+			entity.updateWeight();
 			scene.addEntity(entity);
 		}
 
 		const playerEntity = new Dynastrike.Entity(100, HEIGHT / 2, 50);
-		playerEntity.mass = 9999;
+		playerEntity.mass = 10;
+		playerEntity.updateWeight();
 		scene.addEntity(playerEntity);
 		let commands = 0;
 		addEventListener("keydown", function (event) {
@@ -82,7 +84,7 @@
 
 		function playerInput() {
 			playerEntity.wakeUp();
-			const speed = 0.2;
+			const speed = 2;
 			if (commands & 1) {
 				playerEntity.velocityY -= speed;
 			}
@@ -125,15 +127,27 @@
 			const entitiesLength = entities.length;
 			for (let i = 0; i < entitiesLength; i++) {
 				const entity = entities[i];
-				ctx.strokeStyle = entity.isSleeping ? "#888888" : "#FFFFFF";
+				ctx.globalAlpha = entity.isSleeping ? 0.5 : 1;
+				ctx.strokeStyle = "#FFFFFF";
 				ctx.beginPath();
-				ctx.arc(entity.positionX, entity.positionY, entity.radius, 0, Math.PI * 2);
+				const positionX = entity.positionX;
+				const positionY = entity.positionY;
+				const radius = entity.radius;
+				ctx.arc(positionX, positionY, radius, 0, Math.PI * 2);
 				ctx.stroke();
-				//ctx.strokeStyle = "#FF0000";
-				//const minX = entity.minX;
-				//const minY = entity.minY;
-				//ctx.strokeRect(minX, minY, entity.maxX - minX, entity.maxY - entity.minY);
+				ctx.strokeStyle = "#FF0000";
+				const minX = entity.minX;
+				const minY = entity.minY;
+				ctx.strokeRect(minX, minY, entity.maxX - minX, entity.maxY - entity.minY);
+				ctx.strokeStyle = "#00FF00";
+				ctx.beginPath();
+				ctx.moveTo(positionX, positionY);
+				const angle = entity.angle;
+				ctx.lineTo(positionX + Math.cos(angle) * radius, positionY + Math.sin(angle) * radius);
+				ctx.closePath();
+				ctx.stroke();
 			}
+			ctx.globalAlpha = 1;
 		}
 
 		function animationFrame() {
@@ -143,7 +157,7 @@
 			engineTimeElement.textContent = "engine mspt: " + (performance.now() - engineTime).toFixed(1);
 			const renderTime = performance.now();
 			drawBackground();
-			drawGrid(scene.grid);
+			//drawGrid(scene.grid);
 			drawEntities();
 			requestAnimationFrame(animationFrame);
 			renderTimeElement.textContent = "render mspt: " + (performance.now() - renderTime).toFixed(1);
