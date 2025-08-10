@@ -1,4 +1,4 @@
-export const SLEEP_MOTION_THRESHOLD: number = 0.01;
+export const SLEEP_MOTION_THRESHOLD: number = 0.001;
 export const TICKS_TO_SLEEP: number = 20;
 
 let _entityIndexTicker: number = 0;
