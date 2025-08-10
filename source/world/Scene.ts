@@ -29,43 +29,6 @@ export class Scene {
 		}
 	}
 
-	public removeEntity(entity: Entity): void {
-		const entityIndex: number = entity.index;
-		let indexToRemove: number = -1;
-		const entities: Entity[] = this.entities;
-		const entitiesLength: number = entities.length;
-		for (let i: number = 0; i < entitiesLength; i++) {
-			if (entities[i].index === entityIndex) {
-				indexToRemove = i;
-				break;
-			}
-		}
-		if (indexToRemove === -1) {
-			return;
-		}
-		const lastEntity: Entity = entities.pop()!;
-		if (lastEntity.index !== entityIndex) {
-			entities[indexToRemove] = lastEntity;
-		}
-		if (!entity.isSleeping) {
-			indexToRemove = -1;
-			const activeEntities: Entity[] = this._activeEntities;
-			const activeEntitiesLength: number = activeEntities.length;
-			for (let i: number = 0; i < activeEntitiesLength; i++) {
-				if (activeEntities[i].index === entityIndex) {
-					indexToRemove = i;
-					break;
-				}
-			}
-			if (indexToRemove > -1) {
-				const lastActiveEntity: Entity = activeEntities.pop()!;
-				if (lastActiveEntity.index !== entityIndex) {
-					activeEntities[indexToRemove] = lastActiveEntity;
-				}
-			}
-		}
-	}
-
 	public query(minX: number, minY: number, maxX: number, maxY: number): Entity[] {
 		return this.grid.query(minX, minY, maxX, maxY);
 	}
