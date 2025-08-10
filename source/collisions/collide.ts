@@ -1,75 +1,117 @@
 import { Entity } from "../entity/Entity";
 
+const COLLISION_EPSILON: number = 1e-12;
+
 export function collide(instance: Entity, other: Entity): boolean {
-	const distanceX: number = other.positionX - instance.positionX;
-	const distanceY: number = other.positionY - instance.positionY;
-	const radius: number = instance.radius + other.radius;
+	const instancePositionX: number = instance.positionX;
+	const instancePositionY: number = instance.positionY;
+	const otherPositionX: number = other.positionX;
+	const otherPositionY: number = other.positionY;
+	const distanceX: number = otherPositionX - instancePositionX;
+	const distanceY: number = otherPositionY - instancePositionY;
+	const instanceRadius: number = instance.radius;
+	const otherRadius: number = other.radius;
+	const combinedRadius: number = instanceRadius + otherRadius;
 	const distanceSquared: number = distanceX * distanceX + distanceY * distanceY;
-	if (distanceSquared >= radius * radius) {
+	if (distanceSquared >= combinedRadius * combinedRadius) {
 		return false;
 	}
-	let distance: number = Math.sqrt(distanceSquared);
+
+	// Normals
 	let normalX: number;
 	let normalY: number;
-	if (distance === 0) {
+	let distance: number = 0;
+	if (distanceSquared < COLLISION_EPSILON) {
 		normalX = 1;
 		normalY = 0;
 	} else {
-		normalX = distanceX / distance;
-		normalY = distanceY / distance;
+		distance = Math.sqrt(distanceSquared);
+		const inverseDistance: number = 1 / distance;
+		normalX = distanceX * inverseDistance;
+		normalY = distanceY * inverseDistance;
 	}
-	const instanceinverseMass: number = instance.inverseMass;
-	const otherInverseMass: number = other.inverseMass;
-	const instanceInverseInertia: number = instance.inverseInertia;
-	const otherInverseInertia: number = other.inverseInertia;
-	const inverseMassSum: number = instanceinverseMass + otherInverseMass;
-	const correctioMagnitude: number = (radius - distance + 1e-4) / inverseMassSum;
-	instance.positionX -= correctioMagnitude * instanceinverseMass * normalX;
-	instance.positionY -= correctioMagnitude * instanceinverseMass * normalY;
-	other.positionX += correctioMagnitude * otherInverseMass * normalX;
-	other.positionY += correctioMagnitude * otherInverseMass * normalY;
 
-	const instanceRadius: number = instance.radius;
-	const relativeInstanceX: number = normalX * instanceRadius;
-	const relativeInstanceY: number = normalY * instanceRadius;
-	const otherRadius: number = other.radius;
-	const relativeOtherX: number = -normalX * otherRadius;
-	const relativeOtherY: number = -normalY * otherRadius;
-	const relativeVelocityX: number = (other.velocityX - other.angularVelocity * relativeOtherY) - (instance.velocityX - instance.angularVelocity * relativeInstanceY);
-	const relativeVelocityY: number = (other.velocityY + other.angularVelocity * relativeOtherX) - (instance.velocityY + instance.angularVelocity * relativeInstanceX);
+	// Mass
+	const instanceInverseMass: number = instance.inverseMass;
+	const otherInverseMass: number = other.inverseMass;
+	const totalInverseMass: number = instanceInverseMass + otherInverseMass;
+
+	// Positional correction
+	const penetration: number = combinedRadius - distance;
+	const correctionMagnitude: number = penetration / totalInverseMass;
+	const instanceCorrection: number = correctionMagnitude * instanceInverseMass;
+	const otherCorrection: number = correctionMagnitude * otherInverseMass;
+	instance.positionX = instancePositionX - instanceCorrection * normalX;
+	instance.positionY = instancePositionY - instanceCorrection * normalY;
+	other.positionX = otherPositionX + otherCorrection * normalX;
+	other.positionY = otherPositionY + otherCorrection * normalY;
+
+	// Contact points
+	const instanceRadiusContactX: number = normalX * instanceRadius;
+	const instanceRadiusContactY: number = normalY * instanceRadius;
+	const otherRadiusContactX: number = -normalX * otherRadius;
+	const otherRadiusContactY: number = -normalY * otherRadius;
+
+	// Velocities at contact points
+	const instanceVelocityX: number = instance.velocityX;
+	const instanceVelocityY: number = instance.velocityY;
+	const otherVelocityX: number = other.velocityX;
+	const otherVelocityY: number = other.velocityY;
+	const instanceAngularVelocity: number = instance.angularVelocity;
+	const otherAngularVelocity: number = other.angularVelocity;
+	const instanceContactVelocityX: number = instanceVelocityX - instanceAngularVelocity * instanceRadiusContactY;
+	const instanceContactVelocityY: number = instanceVelocityY + instanceAngularVelocity * instanceRadiusContactX;
+	const otherContactVelocityX: number = otherVelocityX - otherAngularVelocity * otherRadiusContactY;
+	const otherContactVelocityY: number = otherVelocityY + otherAngularVelocity * otherRadiusContactX;
+
+	// Relative velocity
+	const relativeVelocityX: number = otherContactVelocityX - instanceContactVelocityX;
+	const relativeVelocityY: number = otherContactVelocityY - instanceContactVelocityY;
 	const velocityAlongNormal: number = relativeVelocityX * normalX + relativeVelocityY * normalY;
 	if (velocityAlongNormal > 0) {
 		return true;
 	}
-	const normalImpulse: number = (-(1 + Math.min(instance.restitution, other.restitution)) * velocityAlongNormal) / (instanceinverseMass + otherInverseMass);
-	const impulseNormalX: number = normalImpulse * normalX;
-	const impulseNormalY: number = normalImpulse * normalY;
-	instance.velocityX -= instanceinverseMass * impulseNormalX;
-	instance.velocityY -= instanceinverseMass * impulseNormalY;
-	other.velocityX += otherInverseMass * impulseNormalX;
-	other.velocityY += otherInverseMass * impulseNormalY;
-	const tangentX: number = -normalY;
-	const tangentY: number = normalX;
-	const tangentImpulse: number = (-(relativeVelocityX * tangentX + relativeVelocityY * tangentY)) / (instanceinverseMass + otherInverseMass + instanceInverseInertia * (instance.radius * instance.radius) + otherInverseInertia * (other.radius * other.radius));
+
+	// Restitution and friction
 	const staticFriction: number = Math.sqrt(instance.staticFriction * other.staticFriction);
 	const dynamicFriction: number = Math.sqrt(instance.dynamicFriction * other.dynamicFriction);
-	let frictionImpulseScalar: number;
-	if (Math.abs(tangentImpulse) < normalImpulse * staticFriction) {
-		frictionImpulseScalar = tangentImpulse;
+	const restitution: number = Math.min(instance.restitution, other.restitution);
+
+	// Tangent vector and impulse
+	const tangentX: number = -normalY;
+	const tangentY: number = normalX;
+	const velocityAlongTangent: number = relativeVelocityX * tangentX + relativeVelocityY * tangentY;
+	const instanceInverseInertia: number = instance.inverseInertia;
+	const otherInverseInertia: number = other.inverseInertia;
+	const tangentImpulseDenominator: number = instanceInverseMass + otherInverseMass + instanceInverseInertia * (instanceRadius * instanceRadius) + otherInverseInertia * (otherRadius * otherRadius);
+	const tangentImpulseMagnitude: number = (-velocityAlongTangent) / tangentImpulseDenominator;
+
+	// Normal impulse
+	const normalImpulseDenominator: number = instanceInverseMass + otherInverseMass;
+	const normalImpulseMagnitude: number = (-(1 + restitution) * velocityAlongNormal) / normalImpulseDenominator;
+
+	// Friction
+	let frictionMagnitude: number;
+	if (Math.abs(tangentImpulseMagnitude) < Math.abs(normalImpulseMagnitude) * staticFriction) {
+		frictionMagnitude = tangentImpulseMagnitude;
 	} else {
-		frictionImpulseScalar = -normalImpulse * dynamicFriction * (Math.sign(tangentImpulse));
+		const sign: number = tangentImpulseMagnitude > 0 ? 1 : (tangentImpulseMagnitude < 0 ? -1 : 1);
+		frictionMagnitude = -Math.abs(normalImpulseMagnitude) * dynamicFriction * sign;
 	}
-	const impulseTangentX: number = frictionImpulseScalar * tangentX;
-	const impulseTangentY: number = frictionImpulseScalar * tangentY;
-	instance.velocityX -= instanceinverseMass * impulseTangentX;
-	instance.velocityY -= instanceinverseMass * impulseTangentY;
-	other.velocityX += otherInverseMass * impulseTangentX;
-	other.velocityY += otherInverseMass * impulseTangentY;
-	if (instanceInverseInertia !== 0) {
-		instance.angularVelocity -= instanceInverseInertia * (instanceRadius * frictionImpulseScalar);
-	}
-	if (otherInverseInertia !== 0) {
-		other.angularVelocity += otherInverseInertia * (-otherRadius * frictionImpulseScalar);
-	}
+	const frictionImpulseX: number = frictionMagnitude * tangentX;
+	const frictionImpulseY: number = frictionMagnitude * tangentY;
+
+	// Final impulses
+	const normalImpulseX: number = normalImpulseMagnitude * normalX;
+	const normalImpulseY: number = normalImpulseMagnitude * normalY;
+	const totalImpulseX: number = normalImpulseX + frictionImpulseX;
+	const totalImpulseY: number = normalImpulseY + frictionImpulseY;
+	instance.velocityX = instanceVelocityX - instanceInverseMass * totalImpulseX;
+	instance.velocityY = instanceVelocityY - instanceInverseMass * totalImpulseY;
+	other.velocityX = otherVelocityX + otherInverseMass * totalImpulseX;
+	other.velocityY = otherVelocityY + otherInverseMass * totalImpulseY;
+	instance.angularVelocity = instanceAngularVelocity - instanceInverseInertia * (instanceRadius * frictionMagnitude);
+	other.angularVelocity = otherAngularVelocity - otherInverseInertia * (otherRadius * frictionMagnitude);
+
 	return true;
 }
