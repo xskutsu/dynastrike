@@ -34,7 +34,7 @@
 
 		const WIDTH = 800;
 		const HEIGHT = 800;
-		const TOTAL_ENTITIES = 20;
+		const TOTAL_ENTITIES = 2000;
 
 		const engineTimeElement = document.createElement("p");
 		document.body.appendChild(engineTimeElement);
@@ -52,15 +52,14 @@
 
 		const scene = new Dynastrike.Scene(0, 0, WIDTH, HEIGHT, 7);
 		for (let i = 0; i < TOTAL_ENTITIES; i++) {
-			const size = 5 + 10 * Math.random(); // + 2 * Math.random();
-			const entity = new Dynastrike.Entity(400, 400, size);
-			entity.mass = 10;
+			const entity = new Dynastrike.Entity(200 + 400 * Math.random(), 200 + 400 * Math.random(), 3);
+			entity.mass = 1;
 			entity.updateWeight();
 			scene.addEntity(entity);
 		}
 
-		const playerEntity = new Dynastrike.Entity(100, HEIGHT / 2, 50);
-		playerEntity.mass = 10;
+		const playerEntity = new Dynastrike.Entity(100, 400, 50);
+		playerEntity.mass = 9e99;
 		playerEntity.updateWeight();
 		scene.addEntity(playerEntity);
 		let commands = 0;
