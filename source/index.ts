@@ -1,1 +1,27 @@
-console.log("I marginally know what I intend to do.");
+export interface IShape {
+
+}
+
+export interface IBody {
+
+}
+
+export interface IConstraint {
+
+}
+
+export interface ICollider {
+
+}
+
+export interface IPartitioner {
+
+}
+
+export interface IScene {
+
+}
+
+export interface IScheduler {
+
+}
